@@ -1,0 +1,385 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Mar 11, 2025 at 08:34 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.0.30
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: hotel_db
+--
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=root@localhost PROCEDURE cancelReservation (reservationID SMALLINT)   BEGIN
+    UPDATE RESERVATION SET STATUS = 'Cancelled' WHERE RESERVATION_ID = reservationID;
+END$$
+
+CREATE DEFINER=root@localhost PROCEDURE createReservation (customerID SMALLINT, roomID SMALLINT, checkIn DATE, checkOut DATE)   BEGIN
+    INSERT INTO RESERVATION (CUSTOMER_ID, ROOM_ID, CHECK_IN, CHECK_OUT, STATUS)
+    VALUES (customerID, roomID, checkIn, checkOut, 'Confirmed');
+END$$
+
+CREATE DEFINER=root@localhost PROCEDURE getAvailableRooms (startDate DATE, endDate DATE)   BEGIN
+    SELECT ROOM_ID, ROOM_NUMBER, ROOM_TYPE, PRICE_PER_NIGHT
+    FROM ROOM
+    WHERE STATUS = 'Available'
+    AND ROOM_ID NOT IN (
+        SELECT ROOM_ID FROM RESERVATION
+        WHERE (CHECK_IN BETWEEN startDate AND endDate)
+        OR (CHECK_OUT BETWEEN startDate AND endDate)
+        OR (CHECK_IN <= startDate AND CHECK_OUT >= endDate)
+    );
+END$$
+
+CREATE DEFINER=root@localhost PROCEDURE getCustomerReservations (customerID SMALLINT)   BEGIN
+    SELECT R.RESERVATION_ID, C.FIRST_NAME, C.LAST_NAME, ROOM.ROOM_NUMBER, R.CHECK_IN, R.CHECK_OUT, R.STATUS
+    FROM RESERVATION R
+    JOIN CUSTOMER C ON R.CUSTOMER_ID = C.CUSTOMER_ID
+    JOIN ROOM ON R.ROOM_ID = ROOM.ROOM_ID
+    WHERE R.CUSTOMER_ID = customerID;
+END$$
+
+CREATE DEFINER=root@localhost PROCEDURE listReceivedMessages (identifier SMALLINT)   BEGIN
+    SELECT * FROM ANNOUNCEMENTS;
+END$$
+
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table admin
+--
+
+CREATE TABLE admin (
+  ADMIN_ID smallint(5) UNSIGNED NOT NULL,
+  FIRST_NAME varchar(50) NOT NULL,
+  LAST_NAME varchar(50) NOT NULL,
+  EMAIL varchar(100) NOT NULL,
+  PASSWORD_HASH varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table admin
+--
+
+INSERT INTO admin (ADMIN_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD_HASH) VALUES
+(1, 'Christos', 'Nikolaou', 'christos.nikolaou@example.com', '0f53619d95264bdda91705ff101c6c062175df3f157291b6160623c198b918b4'),
+(2, 'Eleni', 'Pappas', 'eleni.pappas@example.com', '78b0e1721b1b584a9c741d13171b71f1c7a16e62f5a5e87377e7b430ac7843b4');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table announcements
+--
+
+CREATE TABLE announcements (
+  ANNOUNCEMENT_ID smallint(5) UNSIGNED NOT NULL,
+  MESSAGE text NOT NULL,
+  CREATED_AT timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table announcements
+--
+
+INSERT INTO announcements (ANNOUNCEMENT_ID, MESSAGE, CREATED_AT) VALUES
+(1, 'Αγαπητοί επισκέπτες, σας καλωσορίζουμε στο ξενοδοχείο μας!', '2025-03-11 19:11:05'),
+(2, 'Το πρωινό σερβίρεται καθημερινά από τις 7:00 έως τις 10:00.', '2025-03-11 19:11:05'),
+(3, 'Η πισίνα θα παραμείνει κλειστή λόγω συντήρησης στις 20 Απριλίου.', '2025-03-11 19:11:05'),
+(4, 'Προσφορά: Έκπτωση 15% σε όλες τις θεραπείες σπα αυτό το Σαββατοκύριακο!', '2025-03-11 19:11:05'),
+(5, 'Δοκιμάστε το νέο μας μενού στο εστιατόριο του ξενοδοχείου!', '2025-03-11 19:11:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table customer
+--
+
+CREATE TABLE customer (
+  CUSTOMER_ID smallint(5) UNSIGNED NOT NULL,
+  FIRST_NAME varchar(50) NOT NULL,
+  LAST_NAME varchar(50) NOT NULL,
+  EMAIL varchar(100) NOT NULL,
+  PASSWORD_HASH varchar(255) NOT NULL,
+  PHONE varchar(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table customer
+--
+
+INSERT INTO customer (CUSTOMER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD_HASH, PHONE) VALUES
+(1, 'George', 'Papadopoulos', 'george.papadopoulos@example.com', '6b1b9c57d7d2c289305f748431891d3dd1d380939bf05da76802ad9462b4d0ac', '6901234567'),
+(2, 'Maria', 'Ioannou', 'maria.ioannou@example.com', '0801c88f026fd2ae7089397ee5800f8d9444c7d01f0f279ebaaeab4d5c0d59b9', '6956789012'),
+(3, 'Nikos', 'Vasilis', 'nikos.vasilis@example.com', 'fb4c5ef452a959e5299a7e05f332ee862abfc984b25f53f11235b188c4910cfe', '6945678923'),
+(4, 'Elena', 'Karali', 'elena.karali@example.com', '9c9d1acd5831d5408dd0a829d3973bdec4bc30b3a82f5b5c6df7b64af97269cd', '6934567890'),
+(5, 'Dimitris', 'Kostis', 'dimitris.kostis@example.com', 'd906fdfc2afa45be94d23a4c851538e28043418aaebbabb731019fcba56cf6f0', '6987654321');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table employee
+--
+
+CREATE TABLE employee (
+  EMPLOYEE_ID smallint(5) UNSIGNED NOT NULL,
+  FIRST_NAME varchar(50) NOT NULL,
+  LAST_NAME varchar(50) NOT NULL,
+  EMAIL varchar(100) NOT NULL,
+  PASSWORD_HASH varchar(255) NOT NULL,
+  SALARY decimal(10,2) NOT NULL,
+  DAYOFF tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table employee
+--
+
+INSERT INTO employee (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD_HASH, SALARY, DAYOFF) VALUES
+(1, 'Petros', 'Markou', 'petros.markou@example.com', '35b9b6a7531916d9a101d7948ab87698f4b1fe8239309d79be248f9c3e186165', 4800.00, 0),
+(2, 'Katerina', 'Lambrou', 'katerina.lambrou@example.com', '31fd90a992fc47169ee75ea061cf6173c045a81e2ee2ce8068d8a4064d126f9c', 7200.00, 1),
+(3, 'Alexandros', 'Dimitriou', 'alex.dimitriou@example.com', '77c566acf3346ffc6b5f049b32bd88ca200716ee163d70857d9dec74517af7d5', 6000.00, 0),
+(4, 'Sofia', 'Zacharaki', 'sofia.zacharaki@example.com', '6191711a1871a6bd50facec7303a0f26fa3158c7fcf696de3de2dbbf01f8d9ab', 8200.00, 1),
+(5, 'Panagiotis', 'Vlachos', 'panos.vlachos@example.com', '1ce2b43f4ad4506c43ed1bdc4a8da52f8c11b3b6c355fd115f5007f9e8e7951b', 5500.00, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table reservation
+--
+
+CREATE TABLE reservation (
+  RESERVATION_ID smallint(5) UNSIGNED NOT NULL,
+  CUSTOMER_ID smallint(5) UNSIGNED NOT NULL,
+  ROOM_ID smallint(5) UNSIGNED NOT NULL,
+  CHECK_IN date NOT NULL,
+  CHECK_OUT date NOT NULL,
+  STATUS enum('Confirmed','Cancelled','Completed') DEFAULT 'Confirmed'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table reservation
+--
+
+INSERT INTO reservation (RESERVATION_ID, CUSTOMER_ID, ROOM_ID, CHECK_IN, CHECK_OUT, STATUS) VALUES
+(1, 1, 1, '2025-04-05', '2025-04-10', 'Confirmed'),
+(2, 2, 3, '2025-05-15', '2025-05-20', 'Confirmed'),
+(3, 3, 2, '2025-06-07', '2025-06-12', 'Completed'),
+(4, 4, 5, '2025-07-18', '2025-07-25', 'Cancelled'),
+(5, 5, 4, '2025-08-10', '2025-08-15', 'Confirmed');
+
+--
+-- Triggers reservation
+--
+DELIMITER $$
+CREATE TRIGGER after_reservation_cancel AFTER UPDATE ON reservation FOR EACH ROW BEGIN
+    IF NEW.STATUS = 'Cancelled' THEN
+        UPDATE ROOM 
+        SET STATUS = 'Available' 
+        WHERE ROOM_ID = NEW.ROOM_ID;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER after_reservation_insert AFTER INSERT ON reservation FOR EACH ROW BEGIN
+    UPDATE ROOM 
+    SET STATUS = 'Booked' 
+    WHERE ROOM_ID = NEW.ROOM_ID;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER after_reservation_update AFTER UPDATE ON reservation FOR EACH ROW BEGIN
+    IF OLD.STATUS != NEW.STATUS THEN
+        INSERT INTO RESERVATION_LOG (RESERVATION_ID, OLD_STATUS, NEW_STATUS)
+        VALUES (OLD.RESERVATION_ID, OLD.STATUS, NEW.STATUS);
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER before_reservation_insert BEFORE INSERT ON reservation FOR EACH ROW BEGIN
+    IF EXISTS (
+        SELECT 1 FROM RESERVATION
+        WHERE ROOM_ID = NEW.ROOM_ID 
+        AND STATUS = 'Confirmed'
+        AND (NEW.CHECK_IN BETWEEN CHECK_IN AND CHECK_OUT 
+            OR NEW.CHECK_OUT BETWEEN CHECK_IN AND CHECK_OUT
+            OR (NEW.CHECK_IN <= CHECK_IN AND NEW.CHECK_OUT >= CHECK_OUT))
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Το δωμάτιο δεν είναι διαθέσιμο για τις επιλεγμένες ημερομηνίες.';
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table reservation_log
+--
+
+CREATE TABLE reservation_log (
+  LOG_ID int(10) UNSIGNED NOT NULL,
+  RESERVATION_ID smallint(5) UNSIGNED NOT NULL,
+  OLD_STATUS enum('Confirmed','Cancelled','Completed') DEFAULT NULL,
+  NEW_STATUS enum('Confirmed','Cancelled','Completed') DEFAULT NULL,
+  CHANGED_AT timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table room
+--
+
+CREATE TABLE room (
+  ROOM_ID smallint(5) UNSIGNED NOT NULL,
+  ROOM_NUMBER varchar(10) NOT NULL,
+  ROOM_TYPE enum('Single','Double','Suite') NOT NULL,
+  PRICE_PER_NIGHT decimal(10,2) NOT NULL,
+  STATUS enum('Available','Booked','Under Maintenance') DEFAULT 'Available'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table room
+--
+
+INSERT INTO room (ROOM_ID, ROOM_NUMBER, ROOM_TYPE, PRICE_PER_NIGHT, STATUS) VALUES
+(1, '201', 'Single', 75.00, 'Available'),
+(2, '202', 'Double', 115.00, 'Available'),
+(3, '203', 'Suite', 250.00, 'Booked'),
+(4, '204', 'Single', 85.00, 'Under Maintenance'),
+(5, '205', 'Double', 140.00, 'Available');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table admin
+--
+ALTER TABLE admin
+  ADD PRIMARY KEY (ADMIN_ID),
+  ADD UNIQUE KEY EMAIL (EMAIL);
+
+--
+-- Indexes for table announcements
+--
+ALTER TABLE announcements
+  ADD PRIMARY KEY (ANNOUNCEMENT_ID);
+
+--
+-- Indexes for table customer
+--
+ALTER TABLE customer
+  ADD PRIMARY KEY (CUSTOMER_ID),
+  ADD UNIQUE KEY EMAIL (EMAIL);
+
+--
+-- Indexes for table employee
+--
+ALTER TABLE employee
+  ADD PRIMARY KEY (EMPLOYEE_ID),
+  ADD UNIQUE KEY EMAIL (EMAIL);
+
+--
+-- Indexes for table reservation
+--
+ALTER TABLE reservation
+  ADD PRIMARY KEY (RESERVATION_ID),
+  ADD KEY CUSTOMER_ID (CUSTOMER_ID),
+  ADD KEY ROOM_ID (ROOM_ID);
+
+--
+-- Indexes for table reservation_log
+--
+ALTER TABLE reservation_log
+  ADD PRIMARY KEY (LOG_ID);
+
+--
+-- Indexes for table room
+--
+ALTER TABLE room
+  ADD PRIMARY KEY (ROOM_ID),
+  ADD UNIQUE KEY ROOM_NUMBER (ROOM_NUMBER);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table admin
+--
+ALTER TABLE admin
+  MODIFY ADMIN_ID smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table announcements
+--
+ALTER TABLE announcements
+  MODIFY ANNOUNCEMENT_ID smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table customer
+--
+ALTER TABLE customer
+  MODIFY CUSTOMER_ID smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table employee
+--
+ALTER TABLE employee
+  MODIFY EMPLOYEE_ID smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table reservation
+--
+ALTER TABLE reservation
+  MODIFY RESERVATION_ID smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table reservation_log
+--
+ALTER TABLE reservation_log
+  MODIFY LOG_ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table room
+--
+ALTER TABLE room
+  MODIFY ROOM_ID smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table reservation
+--
+ALTER TABLE reservation
+  ADD CONSTRAINT reservation_ibfk_1 FOREIGN KEY (CUSTOMER_ID) REFERENCES customer (CUSTOMER_ID) ON DELETE CASCADE,
+  ADD CONSTRAINT reservation_ibfk_2 FOREIGN KEY (ROOM_ID) REFERENCES room (ROOM_ID) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
