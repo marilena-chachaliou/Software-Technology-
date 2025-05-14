@@ -1,0 +1,149 @@
+// Εισαγωγή Πελατών στον πίνακα Customers
+INSERT INTO Customers (name, email, phone, address) VALUES
+('George Papadopoulos', 'george.papadopoulos@example.com', '6901234567', 'Address of George'),
+('Maria Ioannou', 'maria.ioannou@example.com', '6956789012', 'Address of Maria'),
+('Nikos Vasilis', 'nikos.vasilis@example.com', '6945678923', 'Address of Nikos'),
+('Elena Karali', 'elena.karali@example.com', '6934567890', 'Address of Elena'),
+('Dimitris Kostis', 'dimitris.kostis@example.com', '6987654321', 'Address of Dimitris');
+
+// Εισαγωγή Διαχειριστών στον πίνακα Users
+INSERT INTO Users (username, password, name, email, role) VALUES
+('admin_chris', SHA2('admin_chris', 256), 'Christos Nikolaou', 'christos.nikolaou@example.com', 'admin'),
+('secure_admin', SHA2('secure_admin', 256), 'Eleni Pappas', 'eleni.pappas@example.com', 'admin');
+
+// Εισαγωγή Υπαλλήλων στον πίνακα Users
+INSERT INTO Users (username, password, name, email, role) VALUES
+('petros_markou', SHA2('peter_work', 256), 'Petros Markou', 'petros.markou@example.com', 'employee'),
+('kat1234', SHA2('kat1234', 256), 'Katerina Lambrou', 'katerina.lambrou@example.com', 'employee'),
+('alex_pass', SHA2('alex$pass', 256), 'Alexandros Dimitriou', 'alex.dimitriou@example.com', 'employee'),
+('sofia2024', SHA2('sofia2024', 256), 'Sofia Zacharaki', 'sofia.zacharaki@example.com', 'employee'),
+('vlachos99', SHA2('vlachos99', 256), 'Panagiotis Vlachos', 'panos.vlachos@example.com', 'employee'); 
+
+// Εισαγωγή Δωματίων στον πίνακα Rooms
+INSERT INTO Rooms (room_number, type, price, status) VALUES
+('201', 'Single', 75.00, 'available'),
+('202', 'Double', 115.00, 'available'),
+('203', 'Suite', 250.00, 'occupied'),
+('204', 'Single', 85.00, 'maintenance'),
+('205', 'Double', 140.00, 'available');
+
+// Εισαγωγή Κρατήσεων στον πίνακα Reservations
+INSERT INTO Reservations (customer_id, room_id, check_in, check_out, status, total_price) VALUES
+(1, 1, '2025-04-05', '2025-04-10', 'confirmed', 375.00),
+(2, 3, '2025-05-15', '2025-05-20', 'confirmed', 1250.00),
+(3, 2, '2025-06-07', '2025-06-12', 'completed', 575.00),
+(4, 5, '2025-07-18', '2025-07-25', 'cancelled', 0.00),
+(5, 4, '2025-08-10', '2025-08-15', 'confirmed', 700.00);
+
+
+// Εισαγωγή Πληρωμών στον πίνακα Payments
+INSERT INTO Payments (reservation_id, amount, method, is_advance) VALUES
+(1, 100.00, 'card', TRUE),
+(1, 275.00, 'cash', FALSE),
+(2, 1250.00, 'card', TRUE),
+(3, 600.00, 'cash', FALSE),
+(5, 300.00, 'card', TRUE);
+
+// Εισαγωγή Αξιολογήσεων
+INSERT INTO Reviews (customer_id, reservation_id, rating, comment) VALUES
+(1, 1, 5, 'Άριστη εμπειρία, το δωμάτιο ήταν καθαρό και ήσυχο.'),
+(2, 2, 4, 'Πολύ καλό δωμάτιο αλλά υπήρχε λίγος θόρυβος από τον διάδρομο.'),
+(3, 3, 5, 'Εξαιρετικό προσωπικό και εξυπηρέτηση.'),
+(4, 5, 3, 'Μέτρια εμπειρία, καθυστέρηση στο check-in.'),
+(5, 4, 2, 'Το δωμάτιο ήταν υπό συντήρηση και δεν ενημερώθηκα έγκαιρα.');
+
+// Εισαγωγή υπηρεσιών
+INSERT INTO Services (name, category, price) VALUES
+('Mini Bar - Soft Drinks', 'mini_bar', 12.00),
+('Mini Bar - Snacks', 'mini_bar', 8.50),
+('Full Body Massage', 'spa', 60.00),
+('Facial Treatment', 'spa', 45.00),
+('Laundry Service', 'laundry', 20.00),
+('Airport Transport', 'transport', 35.00),
+('Room Service - Breakfast', 'room_service', 15.00),
+('Room Service - Dinner', 'room_service', 25.00),
+('Conference Hall Rental', 'event', 120.00),
+('Wedding Event Setup', 'event', 500.00);
+
+// Εισαγωγή αιτημάτων για Room Service
+INSERT INTO RoomServiceRequests (reservation_id, service_id, request_time, status) VALUES
+(1, 7, '2025-04-06 08:15:00', 'completed'),
+(2, 9, '2025-05-16 10:30:00', 'pending'),
+(3, 5, '2025-06-08 18:45:00', 'in_progress'),
+(4, 6, '2025-07-20 20:00:00', 'pending'),
+(5, 8, '2025-08-12 22:00:00', 'completed');
+
+
+// Εισαγωγή για το mini bar
+INSERT INTO MiniBarUsage (reservation_id, service_id, quantity, usage_time) VALUES
+(1, 1, 2, '2025-04-06 10:00:00'),
+(2, 1, 1, '2025-05-16 11:15:00'),
+(3, 1, 3, '2025-06-08 19:00:00'),
+(4, 1, 2, '2025-07-20 21:30:00'),
+(5, 1, 1, '2025-08-12 23:00:00');
+
+// Εισαγωγή Εκδηλώσεων
+INSERT INTO Events (customer_id, title, date, room, attendees, cost, notes) VALUES
+(1, 'Wedding Ceremony', '2025-05-01', 'Main Hall', 100, 2500.00, 'Needs catering and decorations.'),
+(2, 'Business Conference', '2025-06-15', 'Conference Room A', 50, 1500.00, 'Audio-visual equipment required.'),
+(3, 'Team Building Workshop', '2025-07-10', 'Meeting Room B', 25, 800.00, 'Light refreshments for attendees.'),
+(4, 'Birthday Party', '2025-08-22', 'Private Room', 20, 500.00, 'Theme party with music.'),
+(5, 'Product Launch', '2025-09-05', 'Grand Ballroom', 200, 5000.00, 'Press invitations and media coverage.');
+
+ 
+// Εισαγωγή μηνυμάτων
+INSERT INTO Messages (sender_id, receiver_id, subject, content) VALUES
+(1, 2, 'Room Availability Inquiry', 'Hello, I would like to inquire about the availability of a double room from 5th May to 10th May.'),
+(2, 1, 'Reservation Confirmation', 'Your reservation for a suite from 15th May to 20th May has been confirmed.'),
+(3, 4, 'Meeting Request', 'Can we schedule a meeting to discuss the upcoming business conference on 20th June?'),
+(4, 5, 'Feedback on Recent Stay', 'I wanted to share my feedback regarding the stay I had last month. Overall, it was a great experience.'),
+(5, 3, 'Payment Reminder', 'Please note that your payment for the upcoming reservation is due on 1st May.');
+
+//Εισαγωγή αδειών
+INSERT INTO Leaves (user_id, leave_date, approved) VALUES
+(1, '2025-05-15', TRUE),
+(2, '2025-06-10', FALSE),
+(3, '2025-07-20', TRUE),
+(4, '2025-08-05', FALSE),
+(5, '2025-09-01', TRUE);
+
+//Εισαγωγή παραγγελιών
+INSERT INTO Orders (ordered_by, order_date, status) VALUES
+(1, '2025-05-10', 'pending'),
+(2, '2025-06-15', 'completed'),
+(3, '2025-07-20', 'pending'),
+(4, '2025-08-05', 'completed'),
+(5, '2025-09-01', 'pending');
+
+//Eισαγωγή για τα προϊόντα αποθήκης / παραγγελιών
+INSERT INTO Supplies (name, stock_quantity, unit) VALUES
+('Shampoo', 50, 'bottles'),
+('Towels', 200, 'pieces'),
+('Toilet Paper', 500, 'rolls'),
+('Mini Bar Snacks', 100, 'packs'),
+('Soap', 150, 'bars');
+
+//Εισαγωγή για τα παραγγελθέντα προϊόντα ανά παραγγελία
+INSERT INTO OrderItems (order_id, supply_id, quantity) VALUES
+(1, 1, 20),  -- 20 Bottles of Shampoo for Order #1
+(1, 2, 50),  -- 50 Towels for Order #1
+(2, 3, 100), -- 100 Rolls of Toilet Paper for Order #2
+(3, 4, 30),  -- 30 Packs of Mini Bar Snacks for Order #3
+(4, 5, 75);  -- 75 Bars of Soap for Order #4
+
+//Εισαγωγή για τα Αιτήματα Ειδικών Υπηρεσιών (π.χ. υγεία, διατροφή)
+INSERT INTO SpecialRequests (customer_id, reservation_id, type, description, status) VALUES
+(1, 1, 'Health', 'Request for a doctor to visit the room due to a cold', 'pending'),
+(2, 2, 'Diet', 'Request for gluten-free meals during the stay', 'fulfilled'),
+(3, 3, 'Health', 'Request for a massage service in the room', 'fulfilled'),
+(4, 4, 'Diet', 'Request for vegetarian meals', 'cancelled'),
+(5, 5, 'Health', 'Request for assistance with mobility due to injury', 'pending');
+
+//Εισαγωγή μεταφορών
+INSERT INTO Transfers (customer_id, reservation_id, pickup_location, dropoff_location, datetime, vehicle_type, status) VALUES
+(1, 1, 'Athens Airport', 'Hotel', '2025-04-05 10:00:00', 'Sedan', 'scheduled'),
+(2, 2, 'Hotel', 'Athens City Center', '2025-05-15 12:00:00', 'Minivan', 'scheduled'),
+(3, 3, 'Athens City Center', 'Hotel', '2025-06-07 14:00:00', 'SUV', 'completed'),
+(4, 4, 'Hotel', 'Athens Airport', '2025-07-18 09:00:00', 'Sedan', 'cancelled'),
+(5, 5, 'Athens Airport', 'Hotel', '2025-08-10 16:00:00', 'Minivan', 'scheduled');
+

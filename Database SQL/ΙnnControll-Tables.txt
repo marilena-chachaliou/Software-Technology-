@@ -1,0 +1,188 @@
+//Δημιουργία βάσης δεδομένων 
+CREATE DATABASE IF NOT EXISTS inncontrol_db;
+
+//Επιλογή της βάσης δεδομένων για να την χρησιμοποιήσουμε
+USE inncontrol_db;
+
+//Πίνακας που αποθηκεύει τους χρήστες του συστήματος(admin & employees)
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY, //αυτόματο αύξων id για κάθε χρήστη
+    username VARCHAR(50) NOT NULL UNIQUE, //μοναδικό όνομα χρήστη
+    password VARCHAR(255) NOT NULL, //κωδικός πρόσβασης χρήστη
+    name VARCHAR(100), //όνομα χρήστη
+    email VARCHAR(100), //email χρήστη
+    role ENUM('admin', 'employee') NOT NULL, //κάθε χρήστης έχει ένα ρόλο(admin ή employee)
+    is_active BOOLEAN DEFAULT TRUE //ενεργή κατάσταση χρήστη
+);
+
+//Πίνακας πελατών
+CREATE TABLE Customers (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY, //αυτόματο αύξων id για κάθε χρήστη
+    name VARCHAR(100) NOT NULL, //όνομα πελάτη
+    email VARCHAR(100), //email πελάτη
+    phone VARCHAR(20), //τηλέφωνο πελάτη
+    address TEXT //διεύθυνση πελάτη
+);
+
+//Πίνακας δωματίων
+CREATE TABLE Rooms (
+    room_id INT AUTO_INCREMENT PRIMARY KEY, //αυτόματο αύξων id για κάθε δωμάτιο
+    room_number VARCHAR(10) NOT NULL, //αριθμός δωματίου (πχ "101", "102")
+    type VARCHAR(50), //τύπος δωματίου (πχ "σουίτα", "μονόκλινο", "δίκλινο")
+    price DECIMAL(10,2), //τιμή ανα διανυκτέρευση για το δωμάτιο
+    status ENUM('available', 'occupied', 'cleaning', 'maintenance') DEFAULT 'available' //Κατάσταση του δωματίου (διαθέσιμο, κατειλημμένο, σε καθαρισμό, σε συντήρηση)
+);
+
+//Πίνακας κρατήσεων
+CREATE TABLE Reservations (
+    reservation_id INT AUTO_INCREMENT PRIMARY KEY, //αυτόματο αύξων id για κάθε κράτηση
+    customer_id INT, //αναφορά στον πελάτη που έκανε την κράτηση
+    room_id INT, //αναφορά στο δωμάτιο που έχει κρατηθεί
+    check_in DATE, //ημερομηνία άφιξης
+    check_out DATE, //ημερομηνία αναχώρησης
+    status ENUM('confirmed', 'cancelled', 'completed') DEFAULT 'confirmed', // Κατάσταση της κράτησης (επιβεβαιωμένη, ακυρωμένη, ολοκληρωμένη)
+    total_price DECIMAL(10,2), //συνολικό ποσό πληρωμής για την κράτηση
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id), //σύνδεση με τον πίνακα πελατών μέσω του customer_id
+    FOREIGN KEY (room_id) REFERENCES Rooms(room_id) //σύνδεση με τον πίνακα δωματίων μέσω του room_id
+);
+
+//Πίνακας πληρωμών
+CREATE TABLE Payments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY, //αυτόματο αύξων id για κάθε πληρωμή
+    reservation_id INT, //αναφορά στην κράτηση για την οποία έγινε η πληρωμή
+    amount DECIMAL(10,2), //ποσό πληρωμής
+    method ENUM('card', 'cash'), //μέθοδος πληρωμής
+    is_advance BOOLEAN DEFAULT FALSE, // δηλώνει αν έχει πληρωθεί προκαταβολή
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP, //ημερομηνία και ώρα πληρωμής
+    FOREIGN KEY (reservation_id) REFERENCES Reservations(reservation_id) //Σύνδεση με τον πίνακα κρατήσεων μέσω του reservation_id
+);
+
+// Πίνακας αξιολογήσεων διαμονής
+CREATE TABLE Reviews (
+    review_id INT AUTO_INCREMENT PRIMARY KEY, //αύξων αριθμός για κάθε αξιολόγηση 
+    customer_id INT, //Αναφορά στον πελάτη που έκανε την αξιολόγηση
+    reservation_id INT, //Αναφορά στην κράτηση για την οποία έγινε η αξιολόγηση
+    rating INT CHECK (rating BETWEEN 1 AND 5), //Βαθμολογία από 1 έως 5
+    comment TEXT, //Σχόλιο του πελάτη για την διαμονή
+    review_date DATETIME DEFAULT CURRENT_TIMESTAMP, //Ημερομηνία και ώρα αξιολόγησης
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id), //Σύνδεση με τον πίνακα πελατών μέσω του customer_id
+    FOREIGN KEY (reservation_id) REFERENCES Reservations(reservation_id) //Σύνδεση με τον πίνακα κρατήσεων μέσω του reservation_id
+);
+
+// Πίνακας υπηρεσιών (Mini bar, spa, laundry, room service, events)
+CREATE TABLE Services (
+    service_id INT AUTO_INCREMENT PRIMARY KEY, //Αυτόματο αύξων αριθμός για κάθε υπηρεσία
+    name VARCHAR(100), //Όνομα της υπηρεσίας (π.χ. "Mini bar", "Spa")
+    category ENUM('mini_bar', 'spa', 'laundry', 'transport', 'room_service', 'event'), //κατηγορία υπηρεσίας
+    price DECIMAL(10,2) //τιμή της υπηρεσίας
+);
+
+// Πίνακας αιτημάτων για Room Service
+CREATE TABLE RoomServiceRequests (
+    request_id INT AUTO_INCREMENT PRIMARY KEY, //Αυτόματο αύξων αριθμός για κάθε αίτημα
+    reservation_id INT, //Αναφορά στην κράτηση για την οποία έγινε το αίτημα
+    service_id INT, //Αναφορά στην υπηρεσία που ζητήθηκε
+    request_time DATETIME DEFAULT CURRENT_TIMESTAMP, //Ημερομηνία και ώρα του αιτήματος
+    status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending', //Κατάσταση του αιτήματος (εκκρεμεί, σε εξέλιξη, ολοκληρώθηκε)
+    FOREIGN KEY (reservation_id) REFERENCES Reservations(reservation_id), //Σύνδεση με τον πίνακα κρατήσεων μέσω του reservation_id
+    FOREIGN KEY (service_id) REFERENCES Services(service_id) //Σύνδεση με τον πίνακα υπηρεσιών μέσω του service_id
+);
+
+// Πίνακας κατανάλωσης Mini Bar
+CREATE TABLE MiniBarUsage (
+    usage_id INT AUTO_INCREMENT PRIMARY KEY, //Αυτόματο αύξων αριθμός για κάθε κατανάλωση
+    reservation_id INT, //Αναφορά στην κράτηση για την οποία έγινε η κατανάλωση
+    service_id INT, //Αναφορά στην υπηρεσία mini bar
+    quantity INT DEFAULT 1, //Ποσότητα προϊόντων που καταναλώθηκαν
+    usage_time DATETIME DEFAULT CURRENT_TIMESTAMP, //Ημερομηνία και ώρα κατανάλωσης
+    FOREIGN KEY (reservation_id) REFERENCES Reservations(reservation_id), //Σύνδεση με τον πίνακα κρατήσεων μέσω του reservation_id
+    FOREIGN KEY (service_id) REFERENCES Services(service_id) //Σύνδεση με τον πίνακα υπηρεσιών μέσω του service_id
+);
+
+// Πίνακας εκδηλώσεων & συνεδριών
+CREATE TABLE Events (
+    event_id INT AUTO_INCREMENT PRIMARY KEY, //Μοναδικό αναγνωριστικό εκδήλωσης
+    customer_id INT, //πελάτης που διοργανώνει την εκδήλωση
+    title VARCHAR(100), //τίτλος εκδηλωσης
+    date DATE, //ημερομηνία διεξαγωγής εκδήλωσης
+    room VARCHAR(50), //αίθουσα πραγματοποίησης της εκδήλωσης
+    attendees INT, //αριθμός συμμετεχόντων
+    cost DECIMAL(10,2), //κόστος εκδήλωσης
+    notes TEXT, //επιπλέον σημειώσεις
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id) //σύνδεση με τον πίνακα πελατών μέσω του customer_id
+);
+
+// Πίνακας εσωτερικών μηνυμάτων μεταξύ χρηστών
+CREATE TABLE Messages (
+    message_id INT AUTO_INCREMENT PRIMARY KEY, //Μοναδικό αναγνωριστικό συστήματος
+    sender_id INT, //ID αποστολέα
+    receiver_id INT, //ID παραλήπτη
+    subject VARCHAR(100), //Θέμα μηνύματος
+    content TEXT, //Περιεχόμενο μηνύματος
+    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP, //Ημερομηνία και ώρα αποστολής
+    FOREIGN KEY (sender_id) REFERENCES Users(user_id), //Σύνδεση με τον πίνακα του αποστολέα μέσω του user_id
+    FOREIGN KEY (receiver_id) REFERENCES Users(user_id) //Σύνδεση με τον πίνακα του παραλήπτη μέσω του user_id
+);
+
+//Πίνακας αδειών υπαλλήλων
+CREATE TABLE Leaves (
+    leave_id INT AUTO_INCREMENT PRIMARY KEY, //μοναδικό αναγνωριστικό άδειας
+    user_id INT, //αναφορά στον πελάτη που αιτείται άδεια
+    leave_date DATE, //ημερομηνία άδειας
+    approved BOOLEAN DEFAULT FALSE, //έγκριση άδειας 
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) //σύνδεση με πίνακα χρηστών
+);
+
+//Πίνακας για παραγγελίες (για αποθέματα / αναλώσιμα)
+CREATE TABLE Orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY, //μοναδικό αναγνωριστικό παραγγελίας
+    ordered_by INT, //id χρήστη που έκανε την παραγγελία 
+    order_date DATE, //ημερομηνία παραγγελίας
+    status ENUM('pending', 'completed') DEFAULT 'pending', //κατάσταση παραγγελίας
+    FOREIGN KEY (ordered_by) REFERENCES Users(user_id) //σύνδεση με πίνακα χρηστών
+);
+
+//Πίνακας για τα προϊόντα αποθήκης / παραγγελιών
+CREATE TABLE Supplies (
+    supply_id INT AUTO_INCREMENT PRIMARY KEY, //μοναδικό αναγνωριστικό προϊόντος
+    name VARCHAR(100), //όνομα προϊόντος
+    stock_quantity INT DEFAULT 0, //ποσότητα διαθέσιμου αποθέματος
+    unit VARCHAR(20) //μονάδα μέτρησης (πχ τεμάχια)
+);
+
+//Πίνακας για τα παραγγελθέντα προϊόντα ανά παραγγελία
+CREATE TABLE OrderItems (
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY, //μοναδικό αναγνωριστικό για την γραμμή παραγγελίας
+    order_id INT, //αναφορά στην παραγγελία
+    supply_id INT, //αναφορά στο προϊόν
+    quantity INT, //ποσότητα προϊόντος που παραγγέλθηκε
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id), //σύνδεση με πίνακα παραγγελιών
+    FOREIGN KEY (supply_id) REFERENCES Supplies(supply_id) //σύνδεση με πίνακα αποθεμάτων
+);
+
+//Πίνακας για τα Αιτήματα Ειδικών Υπηρεσιών (π.χ. υγεία, διατροφή)
+CREATE TABLE SpecialRequests (
+    request_id INT AUTO_INCREMENT PRIMARY KEY, //μοναδικό αναγνωριστικό αιτήματος
+    customer_id INT, //πελάτης που υπέβαλλε το αίτημα
+    reservation_id INT, //αναφορά στην κράτηση του πελάτη
+    type VARCHAR(100), //τύπος ειδικής υπηρεσίας 
+    description TEXT, //αναλυτική περιγραγή αιτήματος 
+    status ENUM('pending', 'fulfilled', 'cancelled') DEFAULT 'pending', //Κατάταση αιτήματος
+    request_time DATETIME DEFAULT CURRENT_TIMESTAMP, // χρονικη στιγμή υποβολης 
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id), //συνδεση με τον πελάτη 
+    FOREIGN KEY (reservation_id) REFERENCES Reservations(reservation_id) //σύνδεση με την κράτηση 
+);
+
+//Πινακας για τις Μεταφορές Πελατών
+CREATE TABLE Transfers (
+    transfer_id INT AUTO_INCREMENT PRIMARY KEY, //μοναδικό αναγνωριστικό μεταφοράς
+    customer_id INT, //πελάτης που θα μετακινηθεί
+    reservation_id INT, //αναφορά στην κράτηση
+    pickup_location VARCHAR(255), //σημέιο παραλαβής
+    dropoff_location VARCHAR(255), //σημείο αποβίβασης
+    datetime DATETIME, //ημερομηνία και ώρα μεταφοράς
+    vehicle_type VARCHAR(50), //τύπος οχηματος 
+    status ENUM('scheduled', 'completed', 'cancelled') DEFAULT 'scheduled', //κατάσταση μεταφοράς
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id), //σύνδεση με πίνακα πελατών
+    FOREIGN KEY (reservation_id) REFERENCES Reservations(reservation_id) // σύνδεση με πίνακα κρατήσεων 
+);
