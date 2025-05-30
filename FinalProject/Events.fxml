@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="inncontrol.EventsController">
+  <top>
+    <Label text="Event Management" style="-fx-font-size: 20px; -fx-padding: 10;" />
+  </top>
+  <center>
+    <VBox spacing="10">
+      <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+      </padding>
+      <TableView fx:id="eventsTable" prefHeight="300">
+        <columns>
+          <TableColumn fx:id="colEvent" text="Event Name" />
+          <TableColumn fx:id="colLocation" text="Location" />
+          <TableColumn fx:id="colDate" text="Date" />
+          <TableColumn fx:id="colOrganizer" text="Organizer" />
+        </columns>
+      </TableView>
+
+      <!-- Inline add/edit form -->
+      <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="inputTitle" promptText="Title" prefWidth="150"/>
+        <TextField fx:id="inputLocation" promptText="Location" prefWidth="150"/>
+        <DatePicker fx:id="inputDate" promptText="Date" prefWidth="150"/>
+        <TextField fx:id="inputOrganizer" promptText="Organizer" prefWidth="150"/>
+        <Button text="Add Event" onAction="#handleAddSimple" fx:id="btnAdd"/>
+        <Button text="Update Event" onAction="#handleUpdate" fx:id="btnUpdate" visible="false"/>
+        <Button text="Cancel" onAction="#handleCancel" fx:id="btnCancel" visible="false"/>
+      </HBox>
+    </VBox>
+  </center>
+  <bottom>
+    <HBox spacing="10" alignment="CENTER">
+      <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+      </padding>
+      <children>
+        <Button text="Edit Event" onAction="#handleEdit"/>
+        <Button text="Delete Event" onAction="#handleDelete"/>
+      </children>
+    </HBox>
+  </bottom>
+</BorderPane>

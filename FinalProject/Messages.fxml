@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="inncontrol.MessagesController">
+    <top>
+        <Label text="Messages / Communication" style="-fx-font-size: 20px; -fx-padding: 10;" />
+    </top>
+    <center>
+        <TableView fx:id="messagesTable">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="40" />
+                <TableColumn fx:id="colSender" text="Sender" />
+                <TableColumn fx:id="colReceiver" text="Receiver" />
+                <TableColumn fx:id="colMessage" text="Message" />
+                <TableColumn fx:id="colDate" text="Date" />
+            </columns>
+        </TableView>
+    </center>
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <children>
+                <Button text="New Message" onAction="#handleNew"/>
+                <Button text="Delete" onAction="#handleDelete"/>
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>

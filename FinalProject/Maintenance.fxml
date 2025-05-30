@@ -1,0 +1,153 @@
+package inncontrol;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+import java.sql.*;
+
+public class MaintenanceController {
+
+    @FXML private TableView<MaintenanceRequest> maintenanceTable;
+    @FXML private TableColumn<MaintenanceRequest, String> colRoom;
+    @FXML private TableColumn<MaintenanceRequest, String> colIssue;
+    @FXML private TableColumn<MaintenanceRequest, String> colDate;
+    @FXML private TableColumn<MaintenanceRequest, String> colResolved;
+
+    @FXML private TextField roomField;
+    @FXML private TextField issueField;
+    @FXML private DatePicker dateField;
+
+    private ObservableList<MaintenanceRequest> requests = FXCollections.observableArrayList();
+
+    private final String DB_URL = "jdbc:mysql://localhost:3306/inncontrol";
+    private final String DB_USER = "root";
+    private final String DB_PASS = "";
+
+    @FXML
+    public void initialize() {
+        colRoom.setCellValueFactory(new PropertyValueFactory<>("roomNumber"));
+        colIssue.setCellValueFactory(new PropertyValueFactory<>("issue"));
+        colDate.setCellValueFactory(new PropertyValueFactory<>("dateReported"));
+        colResolved.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        maintenanceTable.setItems(requests);
+
+        loadData();
+    }
+
+    private Connection connect() throws SQLException {
+        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+    }
+
+    private void loadData() {
+        requests.clear();
+        try (Connection conn = connect()) {
+            String query = "SELECT * FROM maintenance_requests ORDER BY created_at DESC";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                requests.add(new MaintenanceRequest(
+                    rs.getString("room_id"),
+                    rs.getString("description"),
+                    rs.getString("created_at"),
+                    rs.getString("status")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error loading maintenance data.");
+        }
+    }
+
+    public void handleAdd() {
+        String room = roomField.getText().trim();
+        String issue = issueField.getText().trim();
+        String date = dateField.getValue() != null ? dateField.getValue().toString() : "";
+
+        if (room.isEmpty() || issue.isEmpty() || date.isEmpty()) {
+            showAlert("Please fill all fields.");
+            return;
+        }
+
+        try (Connection conn = connect()) {
+            String insert = "INSERT INTO maintenance_requests (room_id, description, status, created_at) VALUES (?, ?, 'open', ?)";
+            PreparedStatement stmt = conn.prepareStatement(insert);
+            stmt.setString(1, room);
+            stmt.setString(2, issue);
+            stmt.setString(3, date);
+            stmt.executeUpdate();
+
+            roomField.clear();
+            issueField.clear();
+            dateField.setValue(null);
+            loadData();
+            showAlert("Issue added successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error adding issue.");
+        }
+    }
+
+    public void handleResolve() {
+        MaintenanceRequest selected = maintenanceTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Please select an issue to mark as resolved.");
+            return;
+        }
+
+        try (Connection conn = connect()) {
+            String update = "UPDATE maintenance_requests SET status = 'closed' WHERE room_id = ? AND description = ? AND created_at = ?";
+            PreparedStatement stmt = conn.prepareStatement(update);
+            stmt.setString(1, selected.getRoomNumber());
+            stmt.setString(2, selected.getIssue());
+            stmt.setString(3, selected.getDateReported());
+            int affected = stmt.executeUpdate();
+            if (affected > 0) {
+                loadData();
+                showAlert("Issue marked as resolved.");
+            } else {
+                showAlert("Failed to update issue.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error updating issue status.");
+        }
+    }
+
+    public void handleDelete() {
+        MaintenanceRequest selected = maintenanceTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Please select an issue to delete.");
+            return;
+        }
+
+        try (Connection conn = connect()) {
+            String delete = "DELETE FROM maintenance_requests WHERE room_id = ? AND description = ? AND created_at = ?";
+            PreparedStatement stmt = conn.prepareStatement(delete);
+            stmt.setString(1, selected.getRoomNumber());
+            stmt.setString(2, selected.getIssue());
+            stmt.setString(3, selected.getDateReported());
+            int affected = stmt.executeUpdate();
+            if (affected > 0) {
+                loadData();
+                showAlert("Issue deleted.");
+            } else {
+                showAlert("Failed to delete issue.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error deleting issue.");
+        }
+    }
+
+    private void showAlert(String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Maintenance");
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
+    }
+}
