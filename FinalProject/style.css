@@ -1,0 +1,29 @@
+
+.root {
+    -fx-background-color: #1e1e1e;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+.label, .title-label {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.text-field, .password-field, .combo-box, .date-picker {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+    -fx-padding: 10;
+}
+
+.button {
+    -fx-background-color: #3a3a3a;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+}
+.button:hover {
+    -fx-background-color: #505050;
+}

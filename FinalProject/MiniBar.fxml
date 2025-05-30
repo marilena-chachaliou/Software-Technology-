@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="inncontrol.MiniBarController"
+            prefWidth="800" prefHeight="600">
+
+    <top>
+        <Label text="Mini Bar Management"
+               style="-fx-font-size: 20px; -fx-padding: 10; -fx-text-fill: white;"
+               BorderPane.alignment="CENTER"/>
+    </top>
+
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <TableView fx:id="minibarTable" prefHeight="400">
+                <columns>
+                    <TableColumn fx:id="colBookingId" text="Booking ID"/>
+                    <TableColumn fx:id="colItem" text="Item"/>
+                    <TableColumn fx:id="colQuantity" text="Quantity"/>
+                    <TableColumn fx:id="colCharged" text="Charged"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Booking ID:"/>
+                <ComboBox fx:id="bookingBox" prefWidth="100"/>
+
+                <Label text="Item:"/>
+                <ComboBox fx:id="itemBox" prefWidth="150"/>
+
+                <Label text="Qty:"/>
+                <TextField fx:id="quantityField" prefWidth="60"/>
+            </HBox>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <padding>
+                <Insets top="10" bottom="10"/>
+            </padding>
+            <Button text="Add Item" onAction="#handleAdd"/>
+            <Button text="Charge" onAction="#handleCharge"/>
+            <Button text="Remove" onAction="#handleRemove"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

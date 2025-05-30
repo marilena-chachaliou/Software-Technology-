@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="inncontrol.BookingsController">
+    <top>
+        <Label text="Bookings Management" style="-fx-font-size: 20px; -fx-padding: 10;" />
+    </top>
+
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <TableView fx:id="bookingTable" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="colGuest" text="Guest Name" />
+                    <TableColumn fx:id="colRoom" text="Room Number" />
+                    <TableColumn fx:id="colCheckIn" text="Check-In" />
+                    <TableColumn fx:id="colCheckOut" text="Check-Out" />
+                </columns>
+            </TableView>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <TextField fx:id="guestNameField" promptText="Guest Name" />
+                <TextField fx:id="roomNumberField" promptText="Room Number" />
+                <DatePicker fx:id="checkInPicker" promptText="Check-In Date" />
+                <DatePicker fx:id="checkOutPicker" promptText="Check-Out Date" />
+                <Button fx:id="saveButton" text="Save Booking" onAction="#saveBooking" />
+                <Button fx:id="cancelButton" text="Cancel" onAction="#handleCancel" visible="false" />
+            </HBox>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <children>
+                <Button fx:id="btnAdd" text="Add Booking" onAction="#handleAdd"/>
+                <Button fx:id="editBookingButton" text="Edit Booking" onAction="#handleEdit"/>
+                <Button fx:id="deleteBookingButton" text="Delete Booking" onAction="#handleDelete"/>
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>
